@@ -55,5 +55,29 @@ Usage of ./smtpw:
 JSON
 =============
 ```
-TODO
+type Email struct {
+	From string                 // Key that MUST match From in config
+	To []string
+	Subject string
+	Html string
+	Text string
+	HtmlEmbed map[string]string // file.png => base64(bytes)
+}
 ```
+WARN: I like my parsers strict. Meaning if you add entries to
+HtmlEmbed I search for cid:file.png and if not found it will not
+send the email!
+
+Errors
+=============
+`panic: dial tcp 127.0.0.1:11300: connection refused`
+Install Beanstalkd and update config if Beanstalkd is running elsewhere?
+
+`x509: certificate signed by unknown authority`
+Your SMTP-server has a self-signed certificate? Time to get
+a signed one!
+
+External deps
+=============
+* https://github.com/go-gomail/gomail
+* https://github.com/maxid/beanstalkd
