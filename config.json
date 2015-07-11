@@ -1,0 +1,16 @@
+{
+	"beanstalk": "127.0.0.1:11300",
+	"from": {
+		"support": {
+			"user": "usr",
+			"pass": "ps",
+			"host": "smtp.itshosted.nl",
+			"port": 113,
+			"from": "support@itshosted.nl",
+			"display": "Usenet.Farm Support",
+			"bcc": [
+				"jethro@itshosted.nl"
+			]
+		}
+	}
+}
