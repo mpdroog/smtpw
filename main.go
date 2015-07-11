@@ -74,15 +74,12 @@ func main() {
 		}
 		if verbose {
 			fmt.Println(fmt.Sprintf("Parse job %d", job.Id))
+			fmt.Println("JSON:\r\n" + string(job.Data))
 		}
 		// Parse
 		var m config.Email
 		if e := json.Unmarshal(job.Data, &m); e != nil {
 			// Broken JSON
-			if verbose {
-				fmt.Println("Job=%s", string(job.Data))
-			}
-
 			if skipOne {
 				fmt.Println("WARN: Skip job as JSON is invalid")
 				queue.Delete(job.Id)
