@@ -13,7 +13,7 @@ Why?
 How?
 =============
 * Use Beanstalkd (http://kr.github.io/beanstalkd/) to add jobs in a queue.
-* One or more SMTPw-apps read the queue and try to send
+* One or more SMTPw-instances read the queue and try to send
 * Failure? Wait 20sec and try again!
 
 Config
