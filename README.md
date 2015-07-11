@@ -14,7 +14,7 @@ How?
 =============
 * Use Beanstalkd (http://kr.github.io/beanstalkd/) to add jobs in a queue.
 * One or more SMTPw-instances read the queue and try to send
-* Failure? Wait 20sec and try again!
+* Failure? Wait 5sec on SMTPw error or wait for Beanstalk deadline (if process got killed) and try again!
 
 Config
 =============
@@ -76,6 +76,9 @@ Install Beanstalkd and update config if Beanstalkd is running elsewhere?
 `x509: certificate signed by unknown authority`
 Your SMTP-server has a self-signed certificate? Time to get
 a signed one!
+
+Job never received by SMTPw? Are you sending the JSON to the right tube in Beanstalkd?
+By default I only listen on the email-tube.
 
 External deps
 =============
