@@ -77,8 +77,9 @@ func main() {
 	for {
 		job, e := queue.Reserve(0)
 		if e != nil {
-			fmt.Println("Beanstalkd err:" + e.Error())
+			fmt.Println("Beanstalkd err: " + e.Error())
 			time.Sleep(time.Second * ERR_WAIT_SEC)
+			continue
 		}
 		if verbose {
 			fmt.Println(fmt.Sprintf("Parse job %d", job.Id))
