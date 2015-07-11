@@ -13,7 +13,6 @@ import (
 	"strings"
 )
 
-const RESERVE_SEC = 20
 const ERR_WAIT_SEC = 5
 var verbose bool
 
@@ -67,7 +66,7 @@ func main() {
 	}
 
 	for {
-		job, e := queue.Reserve(RESERVE_SEC)
+		job, e := queue.Reserve(0)
 		if e != nil {
 			fmt.Println("Beanstalkd err:" + e.Error())
 			time.Sleep(time.Second * ERR_WAIT_SEC)
