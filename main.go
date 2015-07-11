@@ -64,7 +64,16 @@ func main() {
 	if e != nil {
 		panic(e)
 	}
+	// Only listen to email queue.
+	queue.Use("email")
+	if _, e := queue.Watch("email"); e != nil {
+		panic(e)
+	}
+	queue.Ignore("default")
 
+	if verbose {
+		fmt.Println("SMTPw listening on email tube (ignoring default)")
+	}
 	for {
 		job, e := queue.Reserve(0)
 		if e != nil {
