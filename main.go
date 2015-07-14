@@ -23,7 +23,7 @@ func proc(m config.Email) error {
 	}
 
 	msg := gomail.NewMessage()
-	msg.SetHeader("From", conf.Display)
+	msg.SetHeader("From", conf.Display + " <" + conf.From + ">")
 	msg.SetHeader("To", m.To...)
 	msg.SetHeader("Bcc", conf.Bcc...)
 	msg.SetHeader("Subject", m.Subject)
@@ -108,6 +108,9 @@ func main() {
 			continue
 		}
 		queue.Delete(job.Id)
+		if verbose {
+			fmt.Println(fmt.Sprintf("Finished job %d", job.Id))
+		}
 	}
 	queue.Quit()
 }
