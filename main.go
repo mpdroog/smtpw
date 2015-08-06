@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"flag"
 	"gopkg.in/gomail.v1"
-	"github.com/maxid/beanstalkd"
+	"github.com/mpdroog/beanstalkd" //"github.com/maxid/beanstalkd"
 	"smtpw/config"
 	"time"
 	"strings"
