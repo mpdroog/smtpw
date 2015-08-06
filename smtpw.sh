@@ -9,7 +9,7 @@ SERVICE="smtpw"
 DIR="/storage/smtpw"
 USER="$SERVICE"
 LOG="/var/log/$SERVICE"
-PSNAME="smtpw"
+PSNAME="smtpw -c=./config.json"
 
 status() {
 	ps aux | grep -v grep | grep "$PSNAME" > /dev/null
@@ -26,7 +26,7 @@ start() {
 
 	mkdir -p "$LOG"
 	echo -n "Starting $SERVICE: "
-	daemon --user="$USER" "$DIR/smtpw &" 1>$LOG/stdout.log 2>$LOG/stderr.log
+	daemon --user="$USER" "$DIR/smtpw -c=\"./config.json\" &" 1>$LOG/stdout.log 2>$LOG/stderr.log
 	RETVAL=$?
 	echo ""
 	return $RETVAL
