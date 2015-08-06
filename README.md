@@ -3,6 +3,9 @@ SMTP Worker
 Send queued e-mail in separate process through
 a JSON abstraction.
 
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
+
 Why?
 =============
 * Security, SMTP credentials are isolated from the website
