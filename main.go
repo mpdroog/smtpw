@@ -15,6 +15,7 @@ import (
 
 const ERR_WAIT_SEC = 5
 var verbose bool
+var readonly bool
 
 func proc(m config.Email) error {
 	conf, ok := config.C.From[m.From]
@@ -41,6 +42,19 @@ func proc(m config.Email) error {
 		msg.Embed(gomail.CreateFile(name, raw))
 	}
 
+	if readonly {
+		fmt.Println("From: " + conf.Display + " <" + conf.From + ">")
+		fmt.Println(fmt.Sprintf("To: %v", m.To))
+		fmt.Println(fmt.Sprintf("Bcc: %v", conf.Bcc))
+		fmt.Println("Subject: " + m.Subject)
+		fmt.Println("\ntext/plain")
+		fmt.Println(m.Text)
+		fmt.Println("\ntext/html")
+		fmt.Println(m.Html)
+		fmt.Println("\n")
+		return nil
+	}
+
 	mailer := gomail.NewMailer(conf.Host, conf.User, conf.Pass, conf.Port)
 	return mailer.Send(msg)
 }
@@ -52,6 +66,7 @@ func main() {
 	)
 	flag.BoolVar(&verbose, "v", false, "Verbose-mode")
 	flag.BoolVar(&skipOne, "s", false, "Delete e-mail on deverr")
+	flag.BoolVar(&readonly, "r", false, "Don't email but flush to stdout")
 	flag.StringVar(&configPath, "c", "./config.json", "Path to config.json")
 	flag.Parse()
 
@@ -73,6 +88,9 @@ func main() {
 
 	if verbose {
 		fmt.Println("SMTPw listening on email tube (ignoring default)")
+	}
+	if readonly {
+		fmt.Println("!! ReadOnly mode !!")
 	}
 	for {
 		job, e := queue.Reserve(0)
