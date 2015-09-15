@@ -59,6 +59,20 @@ func proc(m config.Email) error {
 	return mailer.Send(msg)
 }
 
+func connect() (*beanstalkd.BeanstalkdClient, error) {
+	queue, e := beanstalkd.Dial(config.C.Beanstalk)
+	if e != nil {
+		return nil, e
+	}
+	// Only listen to email queue.
+	queue.Use("email")
+	if _, e := queue.Watch("email"); e != nil {
+		return nil, e
+	}
+	queue.Ignore("default")
+	return queue, nil
+}
+
 func main() {
 	var (
 		configPath string
@@ -75,16 +89,10 @@ func main() {
 	}
 	// TODO: Test config before starting?
 
-	queue, e := beanstalkd.Dial(config.C.Beanstalk)
+	queue, e := connect()
 	if e != nil {
 		panic(e)
 	}
-	// Only listen to email queue.
-	queue.Use("email")
-	if _, e := queue.Watch("email"); e != nil {
-		panic(e)
-	}
-	queue.Ignore("default")
 
 	if verbose {
 		fmt.Println("SMTPw listening on email tube (ignoring default)")
@@ -97,6 +105,16 @@ func main() {
 		if e != nil {
 			fmt.Println("Beanstalkd err: " + e.Error())
 			time.Sleep(time.Second * ERR_WAIT_SEC)
+			if strings.HasSuffix(e.Error(), "broken pipe") {
+				// Beanstalkd down, reconnect!
+				q, e := connect()
+				if e != nil {
+					fmt.Println("Reconnect err: " + e.Error())
+				}
+				if q != nil {
+					queue = q
+				}
+			}
 			continue
 		}
 		if verbose {
