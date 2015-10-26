@@ -11,11 +11,13 @@ import (
 	"smtpw/config"
 	"time"
 	"strings"
+	"os"
 )
 
 const ERR_WAIT_SEC = 5
 var verbose bool
 var readonly bool
+var hostname string
 
 func proc(m config.Email) error {
 	conf, ok := config.C.From[m.From]
@@ -24,6 +26,7 @@ func proc(m config.Email) error {
 	}
 
 	msg := gomail.NewMessage()
+	msg.SetHeader("Message-ID", RandText(32) + "@" + hostname)
 	msg.SetHeader("From", conf.Display + " <" + conf.From + ">")
 	msg.SetHeader("To", m.To...)
 	msg.SetHeader("Bcc", conf.Bcc...)
@@ -93,9 +96,13 @@ func main() {
 	if e != nil {
 		panic(e)
 	}
+	hostname, e := os.Hostname()
+	if e != nil {
+		panic(e)
+	}
 
 	if verbose {
-		fmt.Println("SMTPw listening on email tube (ignoring default)")
+		fmt.Println("SMTPw(" + hostname + ") email-tube (ignoring default)")
 	}
 	if readonly {
 		fmt.Println("!! ReadOnly mode !!")
