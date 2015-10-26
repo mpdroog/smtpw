@@ -26,7 +26,7 @@ func proc(m config.Email) error {
 	}
 
 	msg := gomail.NewMessage()
-	msg.SetHeader("Message-ID", RandText(32) + "@" + hostname)
+	msg.SetHeader("Message-ID", fmt.Sprintf("<%s@%s>", RandText(32), hostname))
 	msg.SetHeader("From", conf.Display + " <" + conf.From + ">")
 	msg.SetHeader("To", m.To...)
 	msg.SetHeader("Bcc", conf.Bcc...)
@@ -96,7 +96,7 @@ func main() {
 	if e != nil {
 		panic(e)
 	}
-	hostname, e := os.Hostname()
+	hostname, e = os.Hostname()
 	if e != nil {
 		panic(e)
 	}
