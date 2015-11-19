@@ -1,20 +1,21 @@
 package main
 
 import (
-	"errors"
-	"encoding/json"
 	"encoding/base64"
-	"fmt"
+	"encoding/json"
+	"errors"
 	"flag"
-	"gopkg.in/gomail.v1"
+	"fmt"
 	"github.com/mpdroog/beanstalkd" //"github.com/maxid/beanstalkd"
-	"smtpw/config"
-	"time"
-	"strings"
+	"gopkg.in/gomail.v1"
 	"os"
+	"smtpw/config"
+	"strings"
+	"time"
 )
 
 const ERR_WAIT_SEC = 5
+
 var verbose bool
 var readonly bool
 var hostname string
@@ -27,7 +28,7 @@ func proc(m config.Email) error {
 
 	msg := gomail.NewMessage()
 	msg.SetHeader("Message-ID", fmt.Sprintf("<%s@%s>", RandText(32), hostname))
-	msg.SetHeader("From", conf.Display + " <" + conf.From + ">")
+	msg.SetHeader("From", conf.Display+" <"+conf.From+">")
 	msg.SetHeader("To", m.To...)
 	msg.SetHeader("Bcc", conf.Bcc...)
 	msg.SetHeader("Subject", m.Subject)
@@ -41,7 +42,7 @@ func proc(m config.Email) error {
 		if e != nil {
 			return errors.New("HtmlEmbed: " + name + " is not base64!")
 		}
-		if !strings.Contains(m.Html, fmt.Sprintf("cid:" + name)) {
+		if !strings.Contains(m.Html, fmt.Sprintf("cid:"+name)) {
 			return errors.New("HtmlEmbed: " + name + " is not used in the HTML!")
 		}
 		msg.Embed(gomail.CreateFile(name, raw))
@@ -81,7 +82,7 @@ func connect() (*beanstalkd.BeanstalkdClient, error) {
 func main() {
 	var (
 		configPath string
-		skipOne bool
+		skipOne    bool
 	)
 	flag.BoolVar(&verbose, "v", false, "Verbose-mode")
 	flag.BoolVar(&skipOne, "s", false, "Delete e-mail on deverr")
@@ -149,7 +150,7 @@ func main() {
 		if e := proc(m); e != nil {
 			// TODO: Isolate deverr from senderr
 			// Processing trouble?
-			fmt.Println("WARN: Failed sending, retry in 20sec (msg=" + e.Error() + ")")			
+			fmt.Println("WARN: Failed sending, retry in 20sec (msg=" + e.Error() + ")")
 			continue
 		}
 		queue.Delete(job.Id)

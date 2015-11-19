@@ -7,30 +7,30 @@ import (
 )
 
 type ConfigFrom struct {
-	User string
-	Pass string
-	Host string
-	Port int
-	From string
+	User    string
+	Pass    string
+	Host    string
+	Port    int
+	From    string
 	Display string
-	Bcc []string
+	Bcc     []string
 }
 type Config struct {
 	Beanstalk string
-	From map[string]ConfigFrom
+	From      map[string]ConfigFrom
 }
 
 type Email struct {
-	From string
-	To []string
-	Subject string
-	Html string
-	Text string
+	From      string
+	To        []string
+	Subject   string
+	Html      string
+	Text      string
 	HtmlEmbed map[string]string // file.png => base64(bytes)
 }
 
 var (
-	C           Config
+	C Config
 )
 
 func Init(f string) error {
