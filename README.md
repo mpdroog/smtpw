@@ -67,9 +67,9 @@ type Email struct {
 	HtmlEmbed map[string]string // file.png => base64(bytes)
 }
 ```
-WARN: I like my parsers strict. Meaning if you add entries to
-HtmlEmbed I search for cid:file.png and if not found it will not
-send the email!
+
+> WARN: I like my parsers strict. Every HtmlEmbed key is scanned with
+> Html.contains(cid:key) and if not found it will throw an error.
 
 Errors
 =============
@@ -80,8 +80,14 @@ Install Beanstalkd and update config if Beanstalkd is running elsewhere?
 Your SMTP-server has a self-signed certificate? Time to get
 a signed one!
 
-Job never received by SMTPw? Are you sending the JSON to the right tube in Beanstalkd?
-By default I only listen on the email-tube.
+`Job never received by SMTPw?`
+Is the job sent to the email tube? As smtpw only listenes to this tube.
+
+```
+telnet 127.0.0.1 11300
+use email
+peek-ready << should show your JSON here
+```
 
 External deps
 =============
