@@ -32,7 +32,9 @@ func proc(m config.Email) error {
 	msg.SetHeader("Bcc", conf.Bcc...)
 	msg.SetHeader("Subject", m.Subject)
 	msg.SetBody("text/plain", m.Text)
-	msg.AddAlternative("text/html", m.Html)
+	if len(m.Html) > 0 {
+		msg.AddAlternative("text/html", m.Html)
+	}
 
 	for name, embed := range m.HtmlEmbed {
 		raw, e := base64.StdEncoding.DecodeString(embed)
