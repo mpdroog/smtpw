@@ -32,6 +32,9 @@ func proc(m config.Email) error {
 	msg.SetHeader("To", m.To...)
 	msg.SetHeader("Bcc", conf.Bcc...)
 	msg.SetHeader("Subject", m.Subject)
+	if conf.Bounce != nil {
+		msg.SetHeader("Return-Path", *conf.Bounce)
+	}
 	msg.SetBody("text/plain", m.Text)
 	if len(m.Html) > 0 {
 		msg.AddAlternative("text/html", m.Html)

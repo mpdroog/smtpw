@@ -14,6 +14,7 @@ type ConfigFrom struct {
 	From    string
 	Display string
 	Bcc     []string
+	Bounce  *string
 }
 type Config struct {
 	Beanstalk string

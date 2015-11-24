@@ -34,7 +34,8 @@ Config
 			"display": "Usenet.Farm Support",   // Display-name added before From-address
 			"bcc": [
 				"mpdroog@icloud.com"            // Send a secret copy (for your own administration)
-			]
+			],
+			"bounce": "bounce@reply.com"
 		}
 	}
 }
