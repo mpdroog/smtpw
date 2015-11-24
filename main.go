@@ -34,7 +34,7 @@ func proc(m config.Email) error {
 		// Set bounce handling
 		// From receives bounces
 		// Human-clients send to Reply-To
-		msg.SetHeader("From", fmt.Sprintf("<%s>", *conf.Bounce))
+		msg.SetHeader("From", fmt.Sprintf("%s <%s>", conf.Display, *conf.Bounce))
 		msg.SetHeader("Reply-To", fmt.Sprintf("%s <%s>", conf.Display, conf.From))
 	}
 	msg.SetHeader("To", m.To...)
