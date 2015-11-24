@@ -96,6 +96,9 @@ func main() {
 	if e := config.Init(configPath); e != nil {
 		panic(e)
 	}
+	if verbose {
+		fmt.Printf("%+v\n", config.C)
+	}
 	// TODO: Test config before starting?
 
 	queue, e := connect()
