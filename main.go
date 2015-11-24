@@ -28,13 +28,18 @@ func proc(m config.Email) error {
 
 	msg := gomail.NewMessage()
 	msg.SetHeader("Message-ID", fmt.Sprintf("<%s@%s>", RandText(32), hostname))
-	msg.SetHeader("From", conf.Display+" <"+conf.From+">")
+	if conf.Bounce == nil {
+		msg.SetHeader("From", conf.Display+" <"+conf.From+">")
+	} else {
+		// Set bounce handling
+		// From receives bounces
+		// Human-clients send to Reply-To
+		msg.SetHeader("From", fmt.Sprintf("<%s>", *conf.Bounce))
+		msg.SetHeader("Reply-To", fmt.Sprintf("%s <%s>", conf.Display, conf.From))
+	}
 	msg.SetHeader("To", m.To...)
 	msg.SetHeader("Bcc", conf.Bcc...)
 	msg.SetHeader("Subject", m.Subject)
-	if conf.Bounce != nil {
-		msg.SetHeader("Return-Path", *conf.Bounce)
-	}
 	msg.SetBody("text/plain", m.Text)
 	if len(m.Html) > 0 {
 		msg.AddAlternative("text/html", m.Html)

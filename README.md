@@ -41,9 +41,8 @@ Config
 }
 ```
 
-> Bounce adds the `Return-Path` header. In order for this to work
-> the MTA needs to be configured to leave this header alone.
-> i.e. EXIM needs `return_path_remove = false`
+> Bounce sets the `From`-header to the bounce-address and
+> sets `Reply-To` for human replies.
 
 Usage
 =============
