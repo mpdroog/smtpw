@@ -22,12 +22,13 @@ type Config struct {
 }
 
 type Email struct {
-	From      string
-	To        []string
-	Subject   string
-	Html      string
-	Text      string
-	HtmlEmbed map[string]string // file.png => base64(bytes)
+	From        string
+	To          []string
+	Subject     string
+	Html        string
+	Text        string
+	HtmlEmbed   map[string]string // file.png => base64(bytes)
+	Attachments map[string]string // file.png => base64(bytes)
 }
 
 var (
