@@ -56,7 +56,7 @@ func proc(m config.Email) error {
 		msg.Embed(gomail.CreateFile(name, raw))
 	}
 	for name, attachment := range m.Attachments {
-		raw, e := base64.StdEncoding.DecodeString(embed)
+		raw, e := base64.StdEncoding.DecodeString(attachment)
 		if e != nil {
 			return errors.New("Attachment: " + name + " is not base64!")
 		}
