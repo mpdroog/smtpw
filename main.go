@@ -169,6 +169,7 @@ func main() {
 			// TODO: Isolate deverr from senderr
 			// Processing trouble?
 			fmt.Println("WARN: Failed sending, retry in 20sec (msg=" + e.Error() + ")")
+			time.Sleep(time.Second * 20)
 			continue
 		}
 		queue.Delete(job.Id)
