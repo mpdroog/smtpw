@@ -12,6 +12,7 @@ import (
 	"smtpw/config"
 	"strings"
 	"time"
+	"log"
 )
 
 const ERR_WAIT_SEC = 5
@@ -20,6 +21,7 @@ var errTimedOut = errors.New("timed out")
 var verbose bool
 var readonly bool
 var hostname string
+var L *log.Logger
 
 func proc(m config.Email) error {
 	conf, ok := config.C.From[m.From]
@@ -65,15 +67,15 @@ func proc(m config.Email) error {
 	}
 
 	if readonly {
-		fmt.Println("From: " + conf.Display + " <" + conf.From + ">")
-		fmt.Println(fmt.Sprintf("To: %v", m.To))
-		fmt.Println(fmt.Sprintf("Bcc: %v", conf.Bcc))
-		fmt.Println("Subject: " + m.Subject)
-		fmt.Println("\ntext/plain")
-		fmt.Println(m.Text)
-		fmt.Println("\ntext/html")
-		fmt.Println(m.Html)
-		fmt.Println("\n")
+		L.Printf("From: %s <%s>\n", conf.Display, conf.From)
+		L.Printf("To: %v\n", m.To)
+		L.Printf("Bcc: %v\n", conf.Bcc)
+		L.Printf("Subject: %s\n", m.Subject)
+		L.Printf("\ntext/plain\n")
+		L.Printf(m.Text)
+		L.Printf("\ntext/html\n")
+		L.Printf(m.Html)
+		L.Printf("\n\n")
 		return nil
 	}
 
@@ -100,6 +102,8 @@ func main() {
 		configPath string
 		skipOne    bool
 	)
+	L = log.New(os.Stdout, "", log.LstdFlags)
+
 	flag.BoolVar(&verbose, "v", false, "Verbose-mode")
 	flag.BoolVar(&skipOne, "s", false, "Delete e-mail on deverr")
 	flag.BoolVar(&readonly, "r", false, "Don't email but flush to stdout")
@@ -110,7 +114,7 @@ func main() {
 		panic(e)
 	}
 	if verbose {
-		fmt.Printf("%+v\n", config.C)
+		L.Printf("%+v\n", config.C)
 	}
 	// TODO: Test config before starting?
 
@@ -124,10 +128,10 @@ func main() {
 	}
 
 	if verbose {
-		fmt.Println("SMTPw(" + hostname + ") email-tube (ignoring default)")
+		L.Printf("SMTPw(%s) email-tube (ignoring default)\n", hostname)
 	}
 	if readonly {
-		fmt.Println("!! ReadOnly mode !!")
+		L.Printf("!! ReadOnly mode !!\n")
 	}
 	for {
 		job, e := queue.Reserve(15*60) //15min timeout
@@ -137,13 +141,13 @@ func main() {
 				continue
 			}
 
-			fmt.Println("Beanstalkd err: " + e.Error())
+			L.Printf("Beanstalkd err: %s\n", e.Error())
 			time.Sleep(time.Second * ERR_WAIT_SEC)
 			if strings.HasSuffix(e.Error(), "broken pipe") {
 				// Beanstalkd down, reconnect!
 				q, e := connect()
 				if e != nil {
-					fmt.Println("Reconnect err: " + e.Error())
+					L.Printf("Reconnect err: %s\n", e.Error())
 				}
 				if q != nil {
 					queue = q
@@ -152,35 +156,35 @@ func main() {
 			continue
 		}
 		if verbose {
-			fmt.Println(fmt.Sprintf("Parse job %d", job.Id))
-			fmt.Println("JSON:\r\n" + string(job.Data))
+			L.Printf("Parse job %d\n", job.Id)
+			L.Printf("JSON:\n%s\n", string(job.Data))
 		}
 		// Parse
 		var m config.Email
 		if e := json.Unmarshal(job.Data, &m); e != nil {
 			// Broken JSON
 			if skipOne {
-				fmt.Println("WARN: Skip job as JSON is invalid")
+				L.Printf("WARN: Skip job as JSON is invalid\n")
 				queue.Delete(job.Id)
 				skipOne = false
 				continue
 			}
 
 			// Ignore decode trouble
-			fmt.Println("CRIT: Invalid JSON received (msg=" + e.Error() + ")")
+			L.Printf("CRIT: Invalid JSON received (msg=%s)\n", e.Error())
 			continue
 		}
 
 		if e := proc(m); e != nil {
 			// TODO: Isolate deverr from senderr
 			// Processing trouble?
-			fmt.Println("WARN: Failed sending, retry in 20sec (msg=" + e.Error() + ")")
+			L.Printf("WARN: Failed sending, retry in 20sec (msg=%s)\n", e.Error())
 			time.Sleep(time.Second * 20)
 			continue
 		}
 		queue.Delete(job.Id)
 		if verbose {
-			fmt.Println(fmt.Sprintf("Finished job %d", job.Id))
+			L.Printf("Finished job %d", job.Id)
 		}
 	}
 	queue.Quit()
