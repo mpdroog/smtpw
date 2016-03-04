@@ -15,6 +15,7 @@ import (
 )
 
 const ERR_WAIT_SEC = 5
+var errTimedOut = errors.New("timed out")
 
 var verbose bool
 var readonly bool
@@ -129,8 +130,13 @@ func main() {
 		fmt.Println("!! ReadOnly mode !!")
 	}
 	for {
-		job, e := queue.Reserve(0)
+		job, e := queue.Reserve(15*60) //15min timeout
 		if e != nil {
+			if e.Error() == errTimedOut.Error() {
+				// Reserve timeout
+				continue
+			}
+
 			fmt.Println("Beanstalkd err: " + e.Error())
 			time.Sleep(time.Second * ERR_WAIT_SEC)
 			if strings.HasSuffix(e.Error(), "broken pipe") {
