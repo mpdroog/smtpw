@@ -63,12 +63,13 @@ JSON
 =============
 ```
 type Email struct {
-	From string                 // Key that MUST match From in config
-	To []string
-	Subject string
-	Html string
-	Text string
-	HtmlEmbed map[string]string // file.png => base64(bytes)
+	From        string          // Key that MUST match From in config
+	To          []string
+	Subject     string
+	Html        string
+	Text        string
+	HtmlEmbed   map[string]string // file.png => base64(bytes)
+	Attachments map[string]string // file.png => base64(bytes)
 }
 ```
 
