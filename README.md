@@ -77,7 +77,7 @@ type Email struct {
 > Html.contains(cid:key) and if not found it will throw an error.
 
 > WARN: Invalid supplied email-address will fail with errors like
-> `mail: no angle-addr`, please use a descent email RFC validator, i.e. for PHP https://gist.github.com/sepehr/3340008
+> `mail: no angle-addr`, please use a descent email RFC validator, i.e. for PHP https://github.com/iamcal/rfc822
 
 Errors
 =============
