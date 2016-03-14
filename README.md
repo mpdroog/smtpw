@@ -76,6 +76,9 @@ type Email struct {
 > WARN: I like my parsers strict. Every HtmlEmbed key is scanned with
 > Html.contains(cid:key) and if not found it will throw an error.
 
+> WARN: Invalid supplied email-address will fail with errors like
+> `mail: no angle-addr`, please use a descent email RFC validator, i.e. for PHP https://gist.github.com/sepehr/3340008
+
 Errors
 =============
 `panic: dial tcp 127.0.0.1:11300: connection refused`
