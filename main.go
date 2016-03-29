@@ -177,6 +177,7 @@ func main() {
 
 		if e := proc(m); e != nil {
 			// 501 Syntax error in parameters or arguments
+			// http://www.greenend.org.uk/rjk/tech/smtpreplies.html
 			if strings.HasPrefix(e.Error(), "501 ") {
 				L.Printf("WARN: Job buried, invalid email address(es)? (msg=%s)\n", e.Error())
 				queue.Bury(job.Id, 1)
