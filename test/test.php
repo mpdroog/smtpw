@@ -2,7 +2,7 @@
 function msg($msg) {
 	echo $msg . "\n";
 }
-$json = file_get_contents("./test.json");
+$json = file_get_contents(__DIR__ ."/test.json");
 $len = strlen($json);
 
 $fd = fsockopen("127.0.0.1", "11300", $errno, $errstr, 10);
