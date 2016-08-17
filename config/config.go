@@ -7,14 +7,15 @@ import (
 )
 
 type ConfigFrom struct {
-	User    string
-	Pass    string
-	Host    string
-	Port    int
-	From    string
-	Display string
-	Bcc     []string
-	Bounce  *string
+	User     string
+	Pass     string
+	Host     string
+	Port     int
+	From     string
+	Display  string
+	Bcc      []string
+	Bounce   *string
+	Hostname string
 }
 type Config struct {
 	Beanstalk string
