@@ -8,14 +8,15 @@ import (
 	"fmt"
 	"github.com/mpdroog/beanstalkd" //"github.com/maxid/beanstalkd"
 	"gopkg.in/gomail.v1"
+	"log"
 	"os"
 	"smtpw/config"
 	"strings"
 	"time"
-	"log"
 )
 
 const ERR_WAIT_SEC = 5
+
 var errTimedOut = errors.New("timed out")
 
 var verbose bool
@@ -29,8 +30,15 @@ func proc(m config.Email) error {
 		return errors.New("From does not exist: " + m.From)
 	}
 
+	host := conf.Hostname
+	if host == "" {
+		host = hostname
+	}
+
 	msg := gomail.NewMessage()
-	msg.SetHeader("Message-ID", fmt.Sprintf("<%s@%s>", RandText(32), hostname))
+	msg.SetHeader("Message-ID", fmt.Sprintf("<%s@%s>", RandText(32), host))
+	msg.SetHeader("X-Mailer", "smtpw")
+	msg.SetHeader("X-Priority", "3")
 	if conf.Bounce == nil {
 		msg.SetHeader("From", conf.Display+" <"+conf.From+">")
 	} else {
@@ -134,7 +142,7 @@ func main() {
 		L.Printf("!! ReadOnly mode !!\n")
 	}
 	for {
-		job, e := queue.Reserve(15*60) //15min timeout
+		job, e := queue.Reserve(15 * 60) //15min timeout
 		if e != nil {
 			if e.Error() == errTimedOut.Error() {
 				// Reserve timeout
