@@ -97,6 +97,26 @@ use email
 peek-ready << should show your JSON here
 ```
 
+Systemd
+=============
+```bash
+# User + systemd
+useradd -r smtpw
+mkdir -p /home/smtpw
+vi /etc/systemd/system/smtpw@.service
+vi /etc/systemd/system/smtpw.target
+
+chmod 644 /etc/systemd/system/smtpw@.service
+chmod 644 /etc/systemd/system/smtpw.target
+
+systemctl daemon-reload
+systemctl enable smtpw@1
+systemctl enable smtpw@2
+
+systemctl start smtpw@1
+systemctl start smtpw@2
+```
+
 External deps
 =============
 * https://github.com/go-gomail/gomail

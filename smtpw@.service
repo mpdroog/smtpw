@@ -1,0 +1,22 @@
+[Unit]
+Description=SMTPworker
+After=network.target
+Requires=network.target
+PartOf=smtpw.target
+
+[Service]
+LimitNOFILE=8192
+Type=notify
+
+Restart=always
+RestartSec=30
+TimeoutStartSec=0
+
+WorkingDirectory=/home/smtpw
+ExecStart=/home/smtpw/smtpw -c=/home/smtpw/config.json
+User=smtpw
+Group=smtpw
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
