@@ -10,9 +10,10 @@ import (
 	"gopkg.in/gomail.v1"
 	"log"
 	"os"
-	"smtpw/config"
+	"github.com/mpdroog/smtpw/config"
 	"strings"
 	"time"
+	"github.com/coreos/go-systemd/daemon"
 )
 
 const ERR_WAIT_SEC = 5
@@ -141,6 +142,15 @@ func main() {
 	if readonly {
 		L.Printf("!! ReadOnly mode !!\n")
 	}
+
+	sent, e := daemon.SdNotify(false, "READY=1")
+	if e != nil {
+		panic(e)
+	}
+	if !sent {
+		L.Printf("SystemD notify NOT sent\n")
+        }
+
 	for {
 		job, e := queue.Reserve(15 * 60) //15min timeout
 		if e != nil {
