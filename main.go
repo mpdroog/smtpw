@@ -25,7 +25,7 @@ var readonly bool
 var hostname string
 var L *log.Logger
 
-func proc(m config.Email) error {
+func proc(m config.Email, skipOne bool) error {
 	conf, ok := config.C.From[m.From]
 	if !ok {
 		return errors.New("From does not exist: " + m.From)
@@ -60,9 +60,17 @@ func proc(m config.Email) error {
 	for name, embed := range m.HtmlEmbed {
 		raw, e := base64.StdEncoding.DecodeString(embed)
 		if e != nil {
+			if skipOne {
+				L.Printf("WARN: HtmlEmbed: " + name + " is not base64!\n")
+				return nil
+			}
 			return errors.New("HtmlEmbed: " + name + " is not base64!")
 		}
 		if !strings.Contains(m.Html, fmt.Sprintf("cid:"+name)) {
+			if skipOne {
+				L.Printf("WARN: HtmlEmbed: " + name + " is not used in the HTML!")
+				return nil
+			}
 			return errors.New("HtmlEmbed: " + name + " is not used in the HTML!")
 		}
 		msg.Embed(gomail.CreateFile(name, raw))
@@ -70,6 +78,10 @@ func proc(m config.Email) error {
 	for name, attachment := range m.Attachments {
 		raw, e := base64.StdEncoding.DecodeString(attachment)
 		if e != nil {
+			if skipOne {
+				L.Printf("WARN: Attachment: " + name + " is not base64!")
+				return nil
+			}
 			return errors.New("Attachment: " + name + " is not base64!")
 		}
 		msg.Embed(gomail.CreateFile(name, raw))
@@ -193,7 +205,7 @@ func main() {
 			continue
 		}
 
-		if e := proc(m); e != nil {
+		if e := proc(m, skipOne); e != nil {
 			// 501 Syntax error in parameters or arguments
 			// http://www.greenend.org.uk/rjk/tech/smtpreplies.html
 			if strings.HasPrefix(e.Error(), "501 ") {
