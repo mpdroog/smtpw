@@ -84,7 +84,7 @@ func proc(m config.Email, skipOne bool) error {
 			}
 			return errors.New("Attachment: " + name + " is not base64!")
 		}
-		msg.Embed(gomail.CreateFile(name, raw))
+		msg.Attach(gomail.CreateFile(name, raw))
 	}
 
 	if readonly {
