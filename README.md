@@ -35,11 +35,14 @@ Config
 			"bcc": [
 				"mpdroog@icloud.com"            // Send a secret copy (for your own administration)
 			],
-			"bounce": "bounce@reply.com"
+			"bounce": "bounce@reply.com",
+			"Insecure": false
 		}
 	}
 }
 ```
+
+> Be careful with Insecure=true as it will allow MITM (Man In The Middle Attacks)
 
 > Bounce sets the `From`-header to the bounce-address and
 > sets `Reply-To` for human replies.
