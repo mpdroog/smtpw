@@ -8,14 +8,14 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/coreos/go-systemd/daemon"
 	"github.com/mpdroog/beanstalkd" //"github.com/maxid/beanstalkd"
+	"github.com/mpdroog/smtpw/config"
 	"gopkg.in/gomail.v1"
 	"log"
 	"os"
-	"github.com/mpdroog/smtpw/config"
 	"strings"
 	"time"
-	"github.com/coreos/go-systemd/daemon"
 )
 
 const ERR_WAIT_SEC = 5
@@ -105,7 +105,7 @@ func proc(m config.Email, skipOne bool) error {
 
 	cfg := gomail.SetTLSConfig(&tls.Config{ServerName: conf.Host})
 	if conf.Insecure {
-		cfg = gomail.SetTLSConfig(&tls.Config{InsecureSkipVerify : true})
+		cfg = gomail.SetTLSConfig(&tls.Config{InsecureSkipVerify: true})
 	}
 	auth := LoginAuth(conf.User, conf.Pass)
 	mailer := gomail.NewCustomMailer(fmt.Sprintf("%s:%d", conf.Host, conf.Port), auth, cfg)
@@ -134,7 +134,7 @@ func main() {
 	L = log.New(os.Stdout, "", log.LstdFlags)
 
 	flag.BoolVar(&verbose, "v", false, "Verbose-mode")
-        flag.BoolVar(&debug, "d", false, "Debug-mode")
+	flag.BoolVar(&debug, "d", false, "Debug-mode")
 	flag.BoolVar(&skipOne, "s", false, "Delete e-mail on deverr")
 	flag.BoolVar(&readonly, "r", false, "Don't email but flush to stdout")
 	flag.StringVar(&configPath, "c", "./config.json", "Path to config.json")
@@ -170,7 +170,7 @@ func main() {
 	}
 	if !sent {
 		L.Printf("SystemD notify NOT sent\n")
-        }
+	}
 
 	for {
 		job, e := queue.Reserve(15 * 60) //15min timeout
@@ -219,9 +219,9 @@ func main() {
 			continue
 		}
 
-                if verbose {
-                        L.Printf("Email (job=%d email=%s subject=%s)\n", job.Id, m.To[0], m.Subject)
-                }
+		if verbose {
+			L.Printf("Email (job=%d email=%s subject=%s)\n", job.Id, m.To[0], m.Subject)
+		}
 
 		if e := proc(m, skipOne); e != nil {
 			// 501 Syntax error in parameters or arguments

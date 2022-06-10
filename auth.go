@@ -2,14 +2,13 @@ package main
 
 // MIT license (c) andelf 2013
 
-
 import (
-	"net/smtp"
 	"errors"
+	"net/smtp"
 )
 
 type loginAuth struct {
-  username, password string
+	username, password string
 }
 
 func LoginAuth(username, password string) smtp.Auth {
