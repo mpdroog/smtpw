@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
@@ -193,6 +194,12 @@ func main() {
 			}
 			continue
 		}
+
+		// Hackfix. Get rid of array when empty to prevent parsing issues here
+		if bytes.Contains(job.Data, []byte(`,"attachments":[]`)) {
+			job.Data = bytes.Replace(job.Data, []byte(`,"attachments":[]`), []byte(``), 1)
+		}
+
 		if debug {
 			L.Printf("JSON:\n%s\n", string(job.Data))
 		}
