@@ -1,11 +1,10 @@
-module smtpw
+module github.com/mpdroog/smtpw
 
 go 1.18
 
 require (
 	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf
 	github.com/mpdroog/beanstalkd v0.0.0-20150714195341-dcc9264e58e3
-	github.com/mpdroog/smtpw v0.0.0-20200414111146-c6fec1b84f43
 	gopkg.in/gomail.v1 v1.0.0-20150320132819-11b919ab4933
 )
 
