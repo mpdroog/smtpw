@@ -52,8 +52,14 @@ func proc(m config.Email, skipOne bool) error {
 		msg.SetHeader("From", fmt.Sprintf("%s <%s>", conf.Display, *conf.Bounce))
 		msg.SetHeader("Reply-To", fmt.Sprintf("%s <%s>", conf.Display, conf.From))
 	}
+
+	bcc := conf.Bcc
+	if conf.AllowBCC {
+		bcc = append(bcc, m.BCC...)
+	}
+
 	msg.SetHeader("To", m.To...)
-	msg.SetHeader("Bcc", conf.Bcc...)
+	msg.SetHeader("Bcc", bcc...)
 	msg.SetHeader("Subject", m.Subject)
 	msg.SetBody("text/plain", m.Text)
 	if len(m.Html) > 0 {

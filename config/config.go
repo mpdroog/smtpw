@@ -17,6 +17,8 @@ type ConfigFrom struct {
 	Bounce   *string
 	Hostname string
 	Insecure bool
+
+	AllowBCC bool
 }
 type Config struct {
 	Beanstalk string
@@ -26,6 +28,7 @@ type Config struct {
 type Email struct {
 	From        string
 	To          []string
+	BCC         []string
 	Subject     string
 	Html        string
 	Text        string

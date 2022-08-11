@@ -2,15 +2,16 @@
 	"beanstalk": "127.0.0.1:11300",
 	"from": {
 		"support": {
-			"user": "usr",
-			"pass": "ps",
-			"host": "smtp.itshosted.nl",
-			"port": 113,
-			"from": "support@itshosted.nl",
-			"display": "Usenet.Farm Support",
+			"user": "emailuser",
+			"pass": "supersecretpass",
+			"host": "smtp.yourcompany.com",
+			"port": 1234,
+			"from": "support@yourcompany.com",
+			"display": "RootDev",
 			"bcc": [
-				"jethro@itshosted.nl"
-			]
+				"alwayssendhere@yourcompany.com"
+			],
+			"allowBCC": false
 		}
 	}
 }

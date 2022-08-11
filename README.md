@@ -23,20 +23,19 @@ Config
 =============
 ```
 {
-	"beanstalk": "127.0.0.1:11300",             // Hostname:port to Beanstalkd
+	"beanstalk": "127.0.0.1:11300",           // Hostname:port to Beanstalkd
 	"from": {
 		"support": {                            // From in JSON matches to this from
-			"user": "usr",                      // SMTP username
-			"pass": "ps",                       // SMTP password
-			"host": "smtp.itshosted.nl",        // SMTP hostname
-			"port": 113,                        // SMTP port
-			"from": "support@itshosted.nl",     // From-address (used in mail header)
-			"display": "Usenet.Farm Support",   // Display-name added before From-address
+			"user": "emailuser",                  // SMTP username
+			"pass": "supersecretpass",            // SMTP password
+			"host": "smtp.yourcompany.com",       // SMTP hostname
+			"port": 1234,                         // SMTP port
+			"from": "support@yourcompany.com",    // From-address (used in mail header)
+			"display": "RootDev",                 // Display-name added before From-address
 			"bcc": [
-				"mpdroog@icloud.com"            // Send a secret copy (for your own administration)
+				"alwayssendhere@yourcompany.com"    // Send a secret copy (can be useful for monitoring/debugging)
 			],
-			"bounce": "bounce@reply.com",
-			"Insecure": false
+			"allowBCC": false                     // true to allow the BCC-field to be appended by the Email-struct
 		}
 	}
 }
@@ -68,6 +67,7 @@ JSON
 type Email struct {
 	From        string          // Key that MUST match From in config
 	To          []string
+	BCC         []string        // Only used when allowBCC=true in config
 	Subject     string
 	Html        string
 	Text        string
