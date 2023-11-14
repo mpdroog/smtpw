@@ -13,6 +13,7 @@ import (
 	"github.com/mpdroog/smtpw/config"
 	"gopkg.in/gomail.v1"
 	"log"
+	"net/mail"
 	"os"
 	"strings"
 	"time"
@@ -227,6 +228,20 @@ func main() {
 
 		if verbose {
 			L.Printf("Email (job=%d email=%s subject=%s)\n", job.Id, m.To[0], m.Subject)
+		}
+
+		ok := true
+		for _, addr := range m.To {
+			if _, e := mail.ParseAddress(addr); e != nil {
+				L.Printf("WARN: Job buried, invalid email=%s (msg=%s)\n", addr, e.Error())
+				ok = false
+				break
+			}
+		}
+		if !ok {
+			// email(s) invalid, bury job
+			queue.Bury(job.Id, 1)
+			continue
 		}
 
 		if e := proc(m, skipOne); e != nil {
