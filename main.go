@@ -8,15 +8,21 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/coreos/go-systemd/daemon"
-	"github.com/mpdroog/beanstalkd" //"github.com/maxid/beanstalkd"
-	"github.com/mpdroog/smtpw/config"
-	"gopkg.in/gomail.v1"
+	"io"
 	"log"
 	"net/mail"
 	"os"
+	"os/signal"
+	"path/filepath"
+	"regexp"
 	"strings"
+	"syscall"
 	"time"
+
+	"github.com/coreos/go-systemd/daemon"
+	"github.com/mpdroog/beanstalkd" //"github.com/maxid/beanstalkd"
+	"github.com/mpdroog/smtpw/config"
+	"gopkg.in/gomail.v2"
 )
 
 const ERR_WAIT_SEC = 5
@@ -28,6 +34,63 @@ var readonly bool
 var debug bool
 var hostname string
 var L *log.Logger
+
+// safeFilenameRe matches only safe characters for filenames
+var safeFilenameRe = regexp.MustCompile(`[^a-zA-Z0-9._-]`)
+
+// sanitizeFilename removes path components and unsafe characters from filename
+func sanitizeFilename(name string) string {
+	// Remove any path components
+	name = filepath.Base(name)
+	// Replace unsafe characters with underscore
+	name = safeFilenameRe.ReplaceAllString(name, "_")
+	// Limit length
+	if len(name) > 255 {
+		name = name[:255]
+	}
+	// Ensure non-empty
+	if name == "" || name == "." || name == ".." {
+		name = "attachment"
+	}
+	return name
+}
+
+// validateEmail checks size limits to prevent DoS
+func validateEmail(m *config.Email) error {
+	// Check body sizes
+	if len(m.Text) > config.MaxBodySize {
+		return fmt.Errorf("text body exceeds max size (%d > %d)", len(m.Text), config.MaxBodySize)
+	}
+	if len(m.Html) > config.MaxBodySize {
+		return fmt.Errorf("html body exceeds max size (%d > %d)", len(m.Html), config.MaxBodySize)
+	}
+
+	// Check recipient count
+	totalRecipients := len(m.To) + len(m.BCC)
+	if totalRecipients > config.MaxRecipients {
+		return fmt.Errorf("too many recipients (%d > %d)", totalRecipients, config.MaxRecipients)
+	}
+
+	// Check attachment count
+	totalAttachments := len(m.Attachments) + len(m.HtmlEmbed)
+	if totalAttachments > config.MaxAttachments {
+		return fmt.Errorf("too many attachments (%d > %d)", totalAttachments, config.MaxAttachments)
+	}
+
+	// Check individual attachment sizes (base64 encoded, so actual size is ~75% of encoded)
+	for name, data := range m.Attachments {
+		if len(data) > config.MaxAttachmentSize {
+			return fmt.Errorf("attachment %q exceeds max size (%d > %d)", name, len(data), config.MaxAttachmentSize)
+		}
+	}
+	for name, data := range m.HtmlEmbed {
+		if len(data) > config.MaxAttachmentSize {
+			return fmt.Errorf("embed %q exceeds max size (%d > %d)", name, len(data), config.MaxAttachmentSize)
+		}
+	}
+
+	return nil
+}
 
 func proc(m config.Email, skipOne bool) error {
 	conf, ok := config.C.From[m.From]
@@ -42,7 +105,6 @@ func proc(m config.Email, skipOne bool) error {
 
 	msg := gomail.NewMessage()
 	msg.SetHeader("Message-ID", fmt.Sprintf("<%s@%s>", RandText(32), host))
-	msg.SetHeader("X-Mailer", "smtpw")
 	msg.SetHeader("X-Priority", "3")
 	if conf.Bounce == nil {
 		msg.SetHeader("From", conf.Display+" <"+conf.From+">")
@@ -83,7 +145,11 @@ func proc(m config.Email, skipOne bool) error {
 			}
 			return errors.New("HtmlEmbed: " + name + " is not used in the HTML!")
 		}
-		msg.Embed(gomail.CreateFile(name, raw))
+		safeName := sanitizeFilename(name)
+		msg.Embed(safeName, gomail.SetCopyFunc(func(w io.Writer) error {
+			_, err := w.Write(raw)
+			return err
+		}))
 	}
 	for name, attachment := range m.Attachments {
 		raw, e := base64.StdEncoding.DecodeString(attachment)
@@ -94,7 +160,11 @@ func proc(m config.Email, skipOne bool) error {
 			}
 			return errors.New("Attachment: " + name + " is not base64!")
 		}
-		msg.Attach(gomail.CreateFile(name, raw))
+		safeName := sanitizeFilename(name)
+		msg.Attach(safeName, gomail.SetCopyFunc(func(w io.Writer) error {
+			_, err := w.Write(raw)
+			return err
+		}))
 	}
 
 	if readonly {
@@ -110,13 +180,13 @@ func proc(m config.Email, skipOne bool) error {
 		return nil
 	}
 
-	cfg := gomail.SetTLSConfig(&tls.Config{ServerName: conf.Host})
+	dialer := gomail.NewDialer(conf.Host, conf.Port, conf.User, conf.Pass)
+	dialer.TLSConfig = &tls.Config{ServerName: conf.Host}
 	if conf.Insecure {
-		cfg = gomail.SetTLSConfig(&tls.Config{InsecureSkipVerify: true})
+		dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 	}
-	auth := LoginAuth(conf.User, conf.Pass)
-	mailer := gomail.NewCustomMailer(fmt.Sprintf("%s:%d", conf.Host, conf.Port), auth, cfg)
-	return mailer.Send(msg)
+	dialer.Auth = LoginAuth(conf.User, conf.Pass)
+	return dialer.DialAndSend(msg)
 }
 
 func connect() (*beanstalkd.BeanstalkdClient, error) {
@@ -179,7 +249,18 @@ func main() {
 		L.Printf("SystemD notify NOT sent\n")
 	}
 
-	for {
+	// Setup graceful shutdown
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	running := true
+	go func() {
+		sig := <-sigChan
+		L.Printf("Received signal %v, shutting down gracefully...\n", sig)
+		running = false
+	}()
+
+	for running {
 		job, e := queue.Reserve(15 * 60) //15min timeout
 		if e != nil {
 			if e.Error() == errTimedOut.Error() {
@@ -226,6 +307,13 @@ func main() {
 			continue
 		}
 
+		// Validate size limits
+		if e := validateEmail(&m); e != nil {
+			L.Printf("WARN: Job buried, validation failed (msg=%s)\n", e.Error())
+			queue.Bury(job.Id, 1)
+			continue
+		}
+
 		if verbose {
 			L.Printf("Email (job=%d email=%s subject=%s)\n", job.Id, m.To[0], m.Subject)
 		}
@@ -263,5 +351,8 @@ func main() {
 			L.Printf("Finished job %d", job.Id)
 		}
 	}
+
+	L.Printf("Closing queue connection...\n")
 	queue.Quit()
+	L.Printf("Shutdown complete.\n")
 }

@@ -6,6 +6,14 @@ import (
 	"os"
 )
 
+// Size limits to prevent DoS
+const (
+	MaxBodySize       = 10 * 1024 * 1024 // 10 MB max for text/html body
+	MaxAttachmentSize = 25 * 1024 * 1024 // 25 MB max per attachment
+	MaxAttachments    = 20               // Max number of attachments
+	MaxRecipients     = 100              // Max To + BCC recipients
+)
+
 type ConfigFrom struct {
 	User     string
 	Pass     string
@@ -45,6 +53,7 @@ func Init(f string) error {
 	if e != nil {
 		return e
 	}
+	defer r.Close()
 	if e := json.NewDecoder(r).Decode(&C); e != nil {
 		return e
 	}
