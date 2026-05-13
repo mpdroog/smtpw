@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf
-	github.com/mpdroog/beanstalkd v0.0.0-20150714195341-dcc9264e58e3
+	github.com/mpdroog/beanstalkd v0.0.0-20151231090228-bf387addf002
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )
 

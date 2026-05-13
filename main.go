@@ -258,11 +258,17 @@ func main() {
 		sig := <-sigChan
 		L.Printf("Received signal %v, shutting down gracefully...\n", sig)
 		running = false
+		// Close queue to interrupt blocking Reserve() call
+		queue.Quit()
 	}()
 
 	for running {
 		job, e := queue.Reserve(15 * 60) //15min timeout
 		if e != nil {
+			if !running {
+				// Shutdown in progress, exit loop
+				break
+			}
 			if e.Error() == errTimedOut.Error() {
 				// Reserve timeout
 				continue

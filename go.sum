@@ -1,7 +1,7 @@
 github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf h1:iW4rZ826su+pqaw19uhpSCzhj44qo35pNgKFGqzDKkU=
 github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf/go.mod h1:F5haX7vjVVG0kc13fIWeqUViNPyEJxv/OmvnBo0Yme4=
-github.com/mpdroog/beanstalkd v0.0.0-20150714195341-dcc9264e58e3 h1:amJaFVatb0At05pcw0hYgOabKA9MpcB4cCmFGEf/CVY=
-github.com/mpdroog/beanstalkd v0.0.0-20150714195341-dcc9264e58e3/go.mod h1:Qnm/zq76O/pqutkxyyE4WGu30l4S/6iPUnESIDLNFFQ=
+github.com/mpdroog/beanstalkd v0.0.0-20151231090228-bf387addf002 h1:QNXRrUAScGch2v2koxvFMpobq88V7cEGvbLfHX8D+Ak=
+github.com/mpdroog/beanstalkd v0.0.0-20151231090228-bf387addf002/go.mod h1:Qnm/zq76O/pqutkxyyE4WGu30l4S/6iPUnESIDLNFFQ=
 gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc h1:2gGKlE2+asNV9m7xrywl36YYNnBG5ZQ0r/BOOxqPpmk=
 gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc/go.mod h1:m7x9LTH6d71AHyAX77c9yqWCCa3UKHcVEj9y7hAtKDk=
 gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df h1:n7WqCuqOuCbNr617RXOY0AWRXxgwEyPp2z+p0+hgMuE=
